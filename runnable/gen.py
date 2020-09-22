@@ -15,7 +15,7 @@ imgSize = 512
 img = np.zeros((imgSize,imgSize,3), np.uint8)
 hist = []
 SERVER_STATE = False
-newData = True
+newData = False
 data = ""
 
 
@@ -100,7 +100,10 @@ def draw():
     
 
 def exportNew():
-    addConsoleData("Generating IMG\nSending Image")
+    ts = time.gmtime()
+    tm = time.strftime('%X',ts)
+
+    addConsoleData(tm+" Generating... Sending Image")
     first()
     draw()
     #cv.imshow("img",img)
@@ -160,7 +163,7 @@ def START_SERVER():
         s.listen()
         conn, addr = s.accept()
         with conn:
-            print('Connected by', addr)
+            addConsoleData('Connected by'+ str(addr))
             while True:
                 while SERVER_STATE:
                     data = conn.recv(1024)
@@ -185,13 +188,14 @@ def killServer():
     SERVER_STATE = False
 
 def isNewData():
-    global isNewData
-    return isNewData
+    global newData
+    return newData
 
 def getNewData():
-    global newData
-    s = newData
-    newData = ''
+    global data, newData
+    newData = False 
+    s = data
+    data = ''
     return s
 
 

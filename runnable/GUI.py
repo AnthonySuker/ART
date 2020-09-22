@@ -162,22 +162,24 @@ txt_console.pack()
 
 ## </BOT FRAME CONTENTS>
 
+stop_threads = False
+
+
+#this should be exited propperly
 def genRefresher():
     while True:
         if gen.isNewData():
+            print(gen.isNewData())
             s = gen.getNewData()
             updateConsole(s)
         time.sleep(1)
         
-
-
 
 t1 = threading.Thread(target= genRefresher)
 t1.daemon = True
 t1.start()
 
 def perform_exit():
-
     window.destroy()
     gen.killServer()
     print ("EXITING")
