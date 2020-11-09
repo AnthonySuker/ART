@@ -6,12 +6,17 @@ import keyboard as key
 import socket 
 import pickle
 
+import threading
+import time
+
 HOST = '127.0.0.1'
 PORT = 65432
 imgSize = 512
 img = np.zeros((imgSize,imgSize,3), np.uint8)
 hist = []
-SERVER_STATE = FALSE
+SERVER_STATE = False
+newData = False
+data = ""
 
 
 #TODO ART Algorithm
@@ -20,7 +25,14 @@ SERVER_STATE = FALSE
 #TODO save information
 
 
-
+def addConsoleData(s):
+    global newData,data
+    if not newData:
+        newData = True
+        data = s
+    else:
+        data = data +"\n"
+        data = data + s
 
 
 
@@ -88,6 +100,10 @@ def draw():
     
 
 def exportNew():
+    ts = time.gmtime()
+    tm = time.strftime('%X',ts)
+
+    addConsoleData(tm+" Generating... Sending Image")
     first()
     draw()
     #cv.imshow("img",img)
@@ -140,61 +156,50 @@ def generate():
                 choice = c
                     
 
-
-
-
-
-
-
-#generateRect(img,500,(255,255,0))
-#generateCirc(img,500,(255,0,0))
-#generateTri(img,500,(255,0,255))
-
-
-# first()
-# showRecent()
-
-# pimg = pickle.dumps(img)
-# upimg = pickle.loads(pimg)
-
-
-# cv.imshow('image',upimg)
-# cv.waitKey(0)
-
-
-
-# while True:
-#     try:
-#         if key.is_pressed('space'):
-#             first()
-#             showRecent()
-
-
-#             cv.imshow('image',upimg)
-#             cv.waitKey(0)
-#         elif key.is_pressed('q'):
-#             break
-#     except:
-#         print("key pressed")
-
 def START_SERVER():
+    global SERVER_STATE
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
         s.listen()
         conn, addr = s.accept()
         with conn:
-            print('Connected by', addr)
-            while SERVER_STATE:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                print("recieved request:",data)
-                conn.sendall(exportNew())
+            addConsoleData('Connected by'+ str(addr))
+            while True:
+                while SERVER_STATE:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    print("recieved request:",data)
+                    conn.sendall(exportNew())
+
+
+t1 = threading.Thread(target= START_SERVER)
+t1.daemon = True
+t1.start()
+
+def startup():
+    global SERVER_STATE
+    time.sleep(1)
+    SERVER_STATE = True
+
+def killServer():
+    global SERVER_STATE
+    time.sleep(1)
+    SERVER_STATE = False
+
+def isNewData():
+    global newData
+    return newData
+
+def getNewData():
+    global data, newData
+    newData = False 
+    s = data
+    data = ''
+    return s
 
 
 
-cv.destroyAllWindows()
 
-
-
+print('linked')
 

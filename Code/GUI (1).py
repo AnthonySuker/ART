@@ -8,6 +8,7 @@ window = tk.Tk()
 window.title("ART Image Generator")
 folder_path = tk.StringVar()
 folder_path.set("File Save Location")
+tests_amount = tk.StringVar()
 
 started = False
 
@@ -82,6 +83,19 @@ tk.Checkbutton(
     variable = saveJsonVar
 ).grid(sticky='e',row = 0, column=1, padx=15)
 
+
+def start_button():
+    global started, btn_start, lbl_status_actual
+    if(not started):
+        if(not gen.connect()):
+            tk.messagebox.showerror(title='Error',message="couldn't Connect to server")
+        else:
+            lbl_status_actual.config(
+            text = "ONLINE",
+            fg = 'green'
+        )
+    
+    
 
 
 def start_button():
